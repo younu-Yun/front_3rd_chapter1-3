@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { PropsWithChildren, useState } from 'react';
 
 type NewsCategory = '정치' | '경제' | '사회' | '문화';
 
@@ -32,49 +32,49 @@ const Header = ({ totalLikes }: { totalLikes: number }) => (
   </header>
 );
 
-const CategoryButton = ({
-                          category,
-                          currentCategory,
-                          onClick
-                        }: {
-  category: NewsCategory | null,
-  currentCategory: NewsCategory | null,
-  onClick: () => void
-}) => {
-  const getNavClassName = (cat: NewsCategory | null) =>
-    cat === currentCategory
-      ? 'bg-blue-500 text-white hover:bg-blue-600'
-      : 'bg-gray-200 text-gray-800 hover:bg-gray-300';
+const SidebarItem = ({
+                       selected = false,
+                       onClick,
+                       children
+                     }: PropsWithChildren<{
+  selected?: boolean,
+  onClick?: () => void
+}>) => {
+  const className = selected
+    ? 'bg-blue-500 text-white hover:bg-blue-600'
+    : 'bg-gray-200 text-gray-800 hover:bg-gray-300';
 
   return (
     <button
       onClick={onClick}
-      className={`w-full mb-2 px-4 py-2 rounded ${getNavClassName(category)}`}
+      className={`w-full mb-2 px-4 py-2 rounded ${className}`}
     >
-      {category || '전체'}
+      {children}
     </button>
   );
 };
 
 const Sidebar = ({
-                   currentCategory,
-                   changeCategory,
-                   resetCategory
+                   items,
+                   value,
+                   change,
                  }: {
-  currentCategory: NewsCategory | null,
-  changeCategory: (cat: NewsCategory) => void,
-  resetCategory: () => void
+  items: (NewsCategory | null)[]
+  value: NewsCategory | null,
+  change: (category: NewsCategory | null) => void,
 }) => (
   <aside className="w-64 bg-white p-4">
-    <CategoryButton category={null} currentCategory={currentCategory} onClick={resetCategory} />
-    {NEWS_CATEGORIES.map(cat => (
-      <CategoryButton
-        key={cat}
-        category={cat}
-        currentCategory={currentCategory}
-        onClick={() => changeCategory(cat)}
-      />
-    ))}
+    {items
+      .map((item, index) => (
+        <SidebarItem
+          key={index}
+          selected={value === item}
+          onClick={() => change(item)}
+        >
+          {item ?? '전체'}
+        </SidebarItem>
+      ))
+    }
   </aside>
 );
 
@@ -97,7 +97,7 @@ const NewsCard = ({ item, onLike }: { item: NewsItem, onLike: (id: number) => vo
 const NewsFeed = ({ news, onLike }: { news: NewsItem[], onLike: (id: number) => void }) => (
   <main className="flex-1 p-4">
     {news.map((item) => (
-      <NewsCard key={item.id} item={item} onLike={onLike} />
+      <NewsCard key={item.id} item={item} onLike={onLike}/>
     ))}
   </main>
 );
@@ -112,12 +112,8 @@ const App = () => {
 
   const totalLikes = news.reduce((sum, item) => sum + item.likes, 0);
 
-  const changeCategory = (newCategory: NewsCategory) => {
+  const changeCategory = (newCategory: NewsCategory | null) => {
     setCategory(newCategory);
-  };
-
-  const resetCategory = () => {
-    setCategory(null);
   };
 
   const likeFeed = (id: number) => {
@@ -128,14 +124,14 @@ const App = () => {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <Header totalLikes={totalLikes} />
+      <Header totalLikes={totalLikes}/>
       <div className="flex">
         <Sidebar
-          currentCategory={category}
-          changeCategory={changeCategory}
-          resetCategory={resetCategory}
+          items={[null, ...NEWS_CATEGORIES]}
+          value={category}
+          change={changeCategory}
         />
-        <NewsFeed news={filteredNews} onLike={likeFeed} />
+        <NewsFeed news={filteredNews} onLike={likeFeed}/>
       </div>
     </div>
   );

@@ -1,12 +1,12 @@
 {
-  "name": "react-profiling-example",
+  "name": "react-profiling-common-example",
   "private": true,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "lint": "eslint .",
+    "lint": "eslint react-profiling-common-example",
     "preview": "vite preview"
   },
   "dependencies": {
